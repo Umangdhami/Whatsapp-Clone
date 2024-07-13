@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+    background-color: #E4E2DE;
+    font-family: "Poppins";
+    margin: 0;
+    padding: 0;
+    /* height: 100vh; */
+    box-sizing: border-box;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.icon svg{
+  fill: #54656F;
+}
+
+.chat-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #bcbcbb;
+  border-radius: 10px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: #acacac;
+}
+
+.right-side{
+  background-color: #efeae2;
+}
+
+.edit-popup-bg{
+  background-image: url('../public/images/bacground.png');
+}
+
+.right-side-bg{
+  background-image: url('../public/images/bacground.png');
+}
+
+.msg-input::placeholder{
+  font-size: 13px;
+}
+
+
+
+.right-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.right-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.right-scroll::-webkit-scrollbar-thumb {
+  background: #bcbcbb;
+  border-radius: 10px;
+}
+
+.right-scroll::-webkit-scrollbar-thumb:hover {
+  background: #acacac;
+}
+
+.option{
+  visibility: hidden;
+  /* visibility: visible; */
+  /* opacity: 1; */
+}
+.chat-ele:hover .option{
+  right: 15px;
+  transition: .2s;
+  visibility: visible;
+  opacity: 1;
+}
+
+.animations{
+  animation: popup 1 linear 150ms;
+}
+
+@keyframes popup {
+  0%{
+    width: 0;
+    height: 0;
+  }
+  100% {
+    width: 90px;
+    height: 149px;
+  }
+  100% {
+    width: 168px;
+    height: 298px;
+  }
+}
+
+
+/* .animations2{
+  animation: popup2 1 linear 150ms;
+}
+
+@keyframes popup2 {
+  0%{
+    width: 0;
+    height: 0;
+  }
+  100% {
+    width: 90px;
+    height: 149px;
+  }
+  100% {
+    width: 168px;
+    height: 298px;
+  }
+} */
+
+
+
+.edit-input::placeholder{
+  font-size: .9375rem;
+  color: #667781;
+}
+
+.file-input::file-selector-button {
+ background-color: transparent;
+ border: 0;
+ padding: 8px 15px;
+ color: white;
+ background-color: #008075;
+ margin-right: 10px;
+}
+
+
+.profile-pics {
+    width: 200px;
+    max-height: 200px;
+    display: inline-block;
+}
+
+.file-upload {
+    display: none;
+}
+
+.circle {
+    border-radius: 100% !important;
+    /* overflow: hidden; */
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    /* position: absolute; */
+    /* top: 72px; */
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+.p-image {
+  /* position: absolute; */
+  /* top: 167px; */
+  /* right: 30px; */
+  color: #666666;
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+}
+.p-image:hover {
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+}
+.upload-button {
+  font-size: 1.2em;
+}
+
+.upload-button:hover {
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+  color: #999;
+} 
