@@ -1,6 +1,7 @@
 
 const URL = {
     // API 
+    // baseUrl : 'http://192.168.29.167:5011/'
     baseUrl : 'http://localhost:5011/'
 }
 
@@ -18,7 +19,8 @@ const ENDPOINTS = {
     deleteChatBothside : URL.baseUrl + 'delete-chat-bothside',
     updateChat : URL.baseUrl + 'update-chat',
     updateProfile : URL.baseUrl + 'updateProfile',
-    loginUser : URL.baseUrl + 'loginUser'
+    loginUser : URL.baseUrl + 'loginUser',
+    getNotificationChat : URL.baseUrl + 'getNotificationChat'
 }
 
 export default ENDPOINTS

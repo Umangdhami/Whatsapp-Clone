@@ -11,7 +11,10 @@ import Protectedroutes from './Container/ProtectedRoute/Protected'
 
 function App() {
   const [count, setCount] = useState(0)
-
+  // const logout = () => {
+  //   // localStorage.clear()
+  //   // window.location.href = '/login'
+  // }
   return (
     <>
       <Routes>
@@ -21,6 +24,7 @@ function App() {
 
         <Route path='/' element={<Protectedroutes />} >
           <Route path='/' element={<Home />} />
+          {/* <Route path='/logout' element={logout()} /> */}
           {/* <Route path='/chat' element={<Home />} /> */}
         </Route>
 

@@ -12,12 +12,14 @@ import Send from '../Chat/Send'
 import Recive from '../Chat/Recive'
 import { v4 as uuid } from 'uuid'
 import { useSocket } from '../../common/SocketContext';
+// import ringtone from '../../../public/messageTones/'
+// import tone1 from '../../../public/messageTones/tone1.mp3'
+import defaultImg from '../../../public/images/default.png'
 
-
-const Rightside = ({ data, reciver }) => {
+const Rightside = ({ data }) => {
 
     const socket = useSocket();
-
+    const audioRef = useRef(null);
 
     const containerRef = useRef(null);
     const messageRefs = useRef({});
@@ -33,7 +35,6 @@ const Rightside = ({ data, reciver }) => {
     const [senderId, setSenderId] = useState('')
     const [username, setUsername] = useState('')
     const [msg, setMsg] = useState('')
-    const [chat, setChat] = useState([])
     const [chats, setChats] = useState([])
     const [chatOptions, setChatOptions] = useState('')
     const [showOptions, setShowOptions] = useState(false)
@@ -61,7 +62,7 @@ const Rightside = ({ data, reciver }) => {
             }
         });
 
-        
+
 
     }, [chats]);
 
@@ -86,8 +87,8 @@ const Rightside = ({ data, reciver }) => {
             }
         });
 
-       
-            
+
+
         return () => {
             chats.forEach(chat => {
                 if (currentRefs[chat._id]) {
@@ -97,11 +98,23 @@ const Rightside = ({ data, reciver }) => {
         };
     }, [chats, observerCallback]);
 
+    // const playAudio = () => {
+    //     if (audioRef.current) {
+    //         audioRef.current.play();
+    //         console.log('koko i am', audioRef.current)
+    //     }
+    //   };
+    const playAudio = async () => {
+        // var audio = new Audio();
+        // audio.src = tone1;
+        // audio.play()
+    }
+
     useEffect(() => {
 
-    if (visibleChats.length != 0) {
-        socket.emit('chatRead', visibleChats)
-    }
+        if (visibleChats.length != 0) {
+            socket.emit('chatRead', visibleChats)
+        }
 
     }, [visibleChats])
 
@@ -116,17 +129,19 @@ const Rightside = ({ data, reciver }) => {
         // });
         // ************************
 
-        socket.on('loadNewChat', async (data) => {
-            //load but send success
-            socket.emit('chatSend', data)
 
+        socket.on('loadNewChat', async (data) => {
+            console.log('chat loadss success')
+            //load but send success
+            // alert('send')
+            socket.emit('chatSend', data)
+            // socket.broadcast.emit('chatSendSuccess', data)
             let sender_id = localStorage.getItem('senderId')
             let reciver_id = localStorage.getItem('reciverId')
 
             // if (reciver_id == data.sender_id && data.reciver_id == sender_id) {
             //     setChats((prevChats) => [...prevChats, data])
             // }
-
             if (reciver_id == data.sender_id && data.reciver_id == sender_id) {
                 setChats((prevChats) => {
                     const chatExists = prevChats.some(chat => chat._id === data._id);
@@ -135,6 +150,8 @@ const Rightside = ({ data, reciver }) => {
                     }
                     return prevChats;
                 });
+                // playAudio()
+
             }
             socket.emit('chatRecived', data._id)
 
@@ -144,6 +161,13 @@ const Rightside = ({ data, reciver }) => {
             // }, 3000);
 
         });
+
+        // socket.on('chatSendSuccess', async (data) => {
+        //     console.log('chat sendded')
+        //     if (data._id == msg._id) {
+        //         setIsSend(1)
+        //     }
+        // });
 
         // socket.on('chatRecivedSuccess', (data) => {
         //     console.log('chat recived wow', data)
@@ -184,7 +208,7 @@ const Rightside = ({ data, reciver }) => {
     const handleScroll = () => {
     }
 
-   
+
 
     const closePopup = () => {
         setOpenModal(false)
@@ -216,6 +240,7 @@ const Rightside = ({ data, reciver }) => {
             setChats(chats.map((item) => item._id === res.data.data._id ? res.data.data : item))
             socket.emit('editChat', res.data.data)
         }
+        closePopup()
 
     }
 
@@ -318,7 +343,7 @@ const Rightside = ({ data, reciver }) => {
     }
 
     let getChat = async () => {
-
+        setMsg('')
         if (chatUser.length !== 0) {
             // setChats([])
             const token = localStorage.getItem('token')
@@ -330,6 +355,7 @@ const Rightside = ({ data, reciver }) => {
             const res = await axios.post(ENDPOINTS.getChat, body, { headers })
 
             setChats(res.data.data)
+            //pls active
             const chatElement = document.querySelector('#chat-scroll');
             if (chatElement) {
                 chatElement.scrollTop = chatElement.scrollHeight;
@@ -338,6 +364,7 @@ const Rightside = ({ data, reciver }) => {
     }
 
     useEffect(() => {
+
         if (chatUser.length !== 0) {
             getChat()
             setIsOnline(data.is_online)
@@ -357,6 +384,39 @@ const Rightside = ({ data, reciver }) => {
         }
 
     }, [chatUser])
+
+    const loadChat = async(chat) => {
+
+
+            
+           await socket.emit('chatSend', data)
+            chatSended()
+            // socket.broadcast.emit('chatSendSuccess', data)
+            let sender_id = localStorage.getItem('senderId')
+            let reciver_id = localStorage.getItem('reciverId')
+
+            // if (reciver_id == data.sender_id && data.reciver_id == sender_id) {
+            //     setChats((prevChats) => [...prevChats, data])
+            // }
+            if (reciver_id == data.sender_id && data.reciver_id == sender_id) {
+                setChats((prevChats) => {
+                    const chatExists = prevChats.some(chat => chat._id === data._id);
+                    if (!chatExists) {
+                        return [...prevChats, data];
+                    }
+                    return prevChats;
+                });
+                // playAudio()
+
+            }
+            await socket.emit('chatRecived', data._id)
+            chatRecived()
+
+            // setInterval(() => {
+            //     socket.emit('chatRecived', data._id)
+            // }, 3000);
+
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -384,7 +444,13 @@ const Rightside = ({ data, reciver }) => {
             let reciver_id = localStorage.getItem('reciverId')
             const getCurrentTime = () => moment().format("HH:mm");
             let chat = {
-                _id: uuid(),
+                _id: (() => {
+                    let id = uuid();
+                    while (!id) {
+                        id = uuid();
+                    }
+                    return id;
+                })(),
                 username: username,
                 sender_id: sender_id,
                 reciver_id: reciver_id,
@@ -401,14 +467,15 @@ const Rightside = ({ data, reciver }) => {
             // const res = await axios.post(ENDPOINTS.saveChat, body, { headers })
 
             setChats([...chats, chat])
-            socket.emit('newChat', { ...chat, token })
+            await socket.emit('newChat', { ...chat, token })
+            loadChat(chat)
             setChatId(chat._id)
             // setChats([...chats, res.data.data])
 
             setMsg('')
             // getChat()
 
-            // Query the element by its class name
+            // Query the element by its class name pls active
             const chatElement = document.querySelector('#chat-scroll');
             if (chatElement) {
                 chatElement.scrollTop = chatElement.scrollHeight;
@@ -421,22 +488,25 @@ const Rightside = ({ data, reciver }) => {
         }
     }
 
+
+
+
     // const [ok, setok] = useState({})
     // useEffect(() => {
     //     socket.emit('chatRecived', ok._id)
     // }, [ok])
 
 
-    // socket.on('loadNewChat', async (data) => {
+    // socket.on('dd', async (data) => {
+    //     console.log('new load chat')
+    //     // if (reciverId == data.sender_id && data.reciver_id == senderId) {
+    //     //     setChats([...chats, data])
+    //     //     // setok(data)
+    //     // }
 
-    //     if (reciverId == data.sender_id && data.reciver_id == senderId) {
-    //         setChats([...chats, data])
-    //         // setok(data)
-    //     }
-
-    //     if (reciverId != data.sender_id && data.reciver_id != senderId) {
-    //         socket.emit('chatRecived', data._id)
-    //     }
+    //     // if (reciverId != data.sender_id && data.reciver_id != senderId) {
+    //     //     socket.emit('chatRecived', data._id)
+    //     // }
 
     //     // console.log(data, 'okk2 chats');
 
@@ -501,6 +571,8 @@ const Rightside = ({ data, reciver }) => {
 
     return (
         <>
+
+
             {openModal &&
                 <div style={{ backgroundColor: 'rgba(255, 255, 255, .80' }} className="model-back fixed z-[9999] w-full h-full left-0 top-0">
                     <div className="w-full h-full flex justify-center items-center">
@@ -602,12 +674,15 @@ const Rightside = ({ data, reciver }) => {
                     </div>
                 </div>
             }
+            {/* <audio ref={audioRef} src={tone1} preload="auto" playsInline autoPlay loop>ok</audio> */}
 
             <div className="relative w-[100%] h-full right-side-bg">
                 {
-                    (typeof data === 'object' && data !== null) && (
+                    (typeof data === 'object' && data !== null) ? (
                         // user.map((u, index) => (
+
                         <div className='h-[100%]'>
+
                             <div className="chat-cont w-[100%] h-[100%] flex flex-col justify-between ">
                                 <div className="w-[100%] chat-name px-4 bg-[#F0F2F5]">
                                     <div className="flex w-[100%] justify-between">
@@ -673,13 +748,13 @@ const Rightside = ({ data, reciver }) => {
 
                                                 msg.sender_id == reciverId ?
                                                     //white
-                                                    <div key={msg._id} ref={el => messageRefs.current[msg._id] = el} data-id={msg._id} >
+                                                    <div key={index} ref={el => messageRefs.current[msg._id] = el} data-id={msg._id} >
                                                         <Recive msg={msg} chatOptions={chatOptions} index={index} optionMenu={optionMenu} showOptions={showOptions} vrPosition={vrPosition} hrPosition={hrPosition} openDeleteModel={openDeleteModel} />
                                                     </div>
                                                     : msg.delete_me === 0 &&
                                                     //green
                                                     // <div key={msg._id} ref={el => messageRefs.current[msg._id] = el} data-id={msg._id} >
-                                                    <Send chatId={chatId} msgId={msg._id} msg={msg} chatOptions={chatOptions} index={index} optionMenu={optionMenu} showOptions={showOptions} vrPosition={vrPosition} hrPosition={hrPosition} openDeleteModel={openDeleteModel} openEditModel={openEditModel} />
+                                                    <Send key={index} chatId={chatId} msgId={msg._id} msg={msg} chatOptions={chatOptions} index={index} optionMenu={optionMenu} showOptions={showOptions} vrPosition={vrPosition} hrPosition={hrPosition} openDeleteModel={openDeleteModel} openEditModel={openEditModel} />
                                                 // </div>
                                             ))
                                         }
@@ -731,11 +806,40 @@ const Rightside = ({ data, reciver }) => {
                                     </div>
                                 </div>
                             </div>
-
-
                         </div>
                         // ))
-                    )
+                    ) :
+                        <div className='w-full h-full flex-col flex items-center justify-center py-4' style={{ background: 'linear-gradient(180deg, #f0f2f5 0%, #f0f2f5 100%)' }}>
+                            <div className="w-full h-full flex flex-col items-center justify-between">
+                                <div className='h-full flex flex-col items-center justify-center'>
+                                    <div className="flex items-center justify-center w-[320px] h-[188px]">
+                                        <div className="w-full">
+                                            <img className='w-full h-full object-cover' src={defaultImg} alt="" />
+                                        </div>
+                                    </div>
+                                    <div className="details w-full flex flex-col items-center justify-center">
+                                        <h1 className='mt-[28px] text-[32px] text-[#41525d]'>Download WhatsApp for Windows</h1>
+                                        <p className='text-[##54656f] text-[14px] mt-[24px]'>
+                                            Make calls, share your screen and get a faster experience when you download the Windows app.
+                                        </p>
+                                        <button className='mt-[32px] py-[8px] px-[24px] bg-[#008069] text-[14px] text-white rounded-full'>
+                                            Get from Microsoft Store
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="w-full text-center mb-5">
+                                    <span className='flex justify-center items-center'>
+                                        <span className='text-[#8696A0] pe-1'>
+                                            <svg viewBox="0 0 10 12" height="12" width="10" preserveAspectRatio="xMidYMid meet" className="" version="1.1"><title>lock-small</title><path d="M5.00847986,1.6 C6.38255462,1.6 7.50937014,2.67435859 7.5940156,4.02703389 L7.59911976,4.1906399 L7.599,5.462 L7.75719976,5.46214385 C8.34167974,5.46214385 8.81591972,5.94158383 8.81591972,6.53126381 L8.81591972,9.8834238 C8.81591972,10.4731038 8.34167974,10.9525438 7.75719976,10.9525438 L2.25767996,10.9525438 C1.67527998,10.9525438 1.2,10.4731038 1.2,9.8834238 L1.2,6.53126381 C1.2,5.94158383 1.67423998,5.46214385 2.25767996,5.46214385 L2.416,5.462 L2.41679995,4.1906399 C2.41679995,2.81636129 3.49135449,1.68973395 4.84478101,1.60510326 L5.00847986,1.6 Z M5.00847986,2.84799995 C4.31163824,2.84799995 3.73624912,3.38200845 3.6709675,4.06160439 L3.6647999,4.1906399 L3.663,5.462 L6.35,5.462 L6.35111981,4.1906399 C6.35111981,3.53817142 5.88169076,2.99180999 5.26310845,2.87228506 L5.13749818,2.85416626 L5.00847986,2.84799995 Z" fill="currentColor"></path></svg>
+                                        </span>
+                                        <span className='text-[#8696A0] text-[12px]'>
+                                            Your personal messages are end-to-end encrypted
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                 }
             </div>
         </>

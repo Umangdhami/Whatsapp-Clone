@@ -18,5 +18,6 @@ route.get('/delete-chat-bothside/:id', tokenVerify, controller.deleteChatBothsid
 route.post('/update-chat/:id', tokenVerify, controller.updateChat)
 route.post('/updateProfile/:id', uploadProfile, controller.updateProfile)
 route.get('/getLoginUser',tokenVerify,  controller.getLoginUser)
+route.post('/getNotificationChat',tokenVerify,  controller.getNotificationChat)
 
 module.exports = route;

@@ -25,7 +25,7 @@ usp.on("connection", async (socket) => {
     if (err) {
       console.error("Token verification failed:", err);
     } else {
-      console.log("Token verified:", decoded.user._id);
+      //console.log("Token verified:", decoded.user._id);
 
       try {
         const id = user.id;
@@ -35,7 +35,7 @@ usp.on("connection", async (socket) => {
 
         socket.broadcast.emit("getOnlineUser", { id });
 
-        console.log("A user connected");
+     //   console.log("A user connected");
       } catch (error) {
         console.error("Error updating user's online status:", error);
       }
@@ -47,7 +47,7 @@ usp.on("connection", async (socket) => {
       if (err) {
         console.error("Token verification failed:", err);
       } else {
-        console.log("Token verified:", decoded.user._id);
+     //   console.log("Token verified:", decoded.user._id);
 
         try {
           // Update user's online status
@@ -57,7 +57,7 @@ usp.on("connection", async (socket) => {
           });
 
           socket.broadcast.emit("getOflineUser", { id });
-          console.log("A user disconnected");
+      //    console.log("A user disconnected");
         } catch (error) {
           console.error("Error updating user's online status:", error);
         }

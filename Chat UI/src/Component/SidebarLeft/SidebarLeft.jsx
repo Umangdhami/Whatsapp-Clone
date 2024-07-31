@@ -4,6 +4,7 @@ import ENDPOINTS from '../../common/common'
 import { useDispatch, useSelector } from 'react-redux';
 import { User, chatUsers } from '../../Redux/Action';
 import { useSocket } from '../../common/SocketContext';
+import LeftUserPanel from '../LeftUserPanel/LeftUserPanel';
 
 const SidebarLeft = ({ onButtonClick }) => {
     let dispatch = useDispatch()
@@ -12,14 +13,14 @@ const SidebarLeft = ({ onButtonClick }) => {
     const socket = useSocket()
     const [users, setUsers] = useState([])
     const [loginUser, setLoginUser] = useState([])
-    const [notificationChat, setNotificationChat] = useState([])
-    const [ok, setOk] = useState([])
+    const [isActive, setIsActive] = useState([])
 
     const openChatPanel = async (id) => {
         const token = localStorage.getItem('token')
         const headers = { 'Authorization': `Bearer ${token}` };
         const res = await axios.get(`${ENDPOINTS.getSingleUser}/${id}`, { headers })
         dispatch(User(res.data.data))
+        setIsActive(res.data.data)
         onButtonClick(res.data.data)
     }
 
@@ -33,8 +34,6 @@ const SidebarLeft = ({ onButtonClick }) => {
 
                 if (res.data.status) {
                     setUsers(res.data.data)
-                    setOk(res.data.data)
-                    console.log(res.data.data, 'chat notification')
                     dispatch(chatUsers(res.data.data))
                 } else {
                     alert(res.data.message)
@@ -62,62 +61,10 @@ const SidebarLeft = ({ onButtonClick }) => {
     }, [])
 
 
-    const handleUserWithNoti = () => {
-        console.log(users, 'fe')
-        let reciver_id = localStorage.getItem('user_id')
-
-        console.log(users, 'reciver_id v reciver_id')
-
-      let chatsNoti =  ok.filter((user) => {
-            // user.notification = []
-
-           let notification = notificationChat.filter((chat) => {
-                // if (chat.is_read == 0) {
-                    if (chat.reciver_id == reciver_id && chat.sender_id == user._id) {
-                        return chat
-                    }
-                // }
-
-            })
-            user.notification = notification
-            console.log(user, 'hello user')
-            return user
-        })
-        // setUsers(chatsNoti)
-        console.log(chatsNoti, 'chatsNoti chatsNoti');
-    }
-
-    const handleNotification = async (chat) => {
-        console.log('rt', chat)
-        if (Array.isArray(chat)) {
-            setNotificationChat(prev => {
-                const updatedNotifications = [...prev];
-                chat.forEach(newChat => {
-                    const index = updatedNotifications.findIndex(notification => notification._id === newChat._id);
-                    if (index !== -1) {
-                        updatedNotifications[index] = newChat;
-                    } else {
-                        updatedNotifications.push(newChat);
-                    }
-                });
-                return updatedNotifications;
-            });
-        handleUserWithNoti()
-
-        } else {
-            setNotificationChat(prev => [...prev, chat])
-        handleUserWithNoti()
-
-        }
-
-
-    }
-
     useEffect(() => {
         if (!socket) return;
 
         socket.on('chatRecivedSuccess', (data) => {
-            console.log('chat recived in sidebar left', notificationChat)
             socket.emit('chatReciveNotification', data)
         });
 
@@ -140,13 +87,7 @@ const SidebarLeft = ({ onButtonClick }) => {
 
 
 
-        socket.on('chatReciveNotificationSuccess', (data) => {
-            //is_read 0/1clg
-            console.log('afdaaaaaaaaaaaaaaaaaaasgsrweydtjd123456789op')
-
-            handleNotification(data)
-
-        });
+        
 
 
 
@@ -154,7 +95,7 @@ const SidebarLeft = ({ onButtonClick }) => {
 
     }, [socket]);
 
-    console.log('0', notificationChat);
+    // console.log('0', notificationChat);
     // socket.on('getOfflineUser', (id) => {
     //     console.log('offline')
     //    let user = users.map(u => {
@@ -180,6 +121,7 @@ const SidebarLeft = ({ onButtonClick }) => {
 
     return (
         <div className="w-full h-full">
+
             <div className="w-full h-[113px]">
                 <div className="w-full py-2.5 px-4 profile-bar flex justify-between items-center bg-[#f0f2f5]">
                     <div className="profile-pic w-[40px] h-[40px] rounded-full overflow-hidden">
@@ -220,7 +162,7 @@ const SidebarLeft = ({ onButtonClick }) => {
                         <div className="search-bar w-full">
                             <form className="w-full">
                                 <div className="relative flex items-center">
-                                    <div className='w-[95%] me-3'>
+                                    <div className='w-[95%] me-3 '>
                                         <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" className="" version="1.1" x="0px" y="0px" enableBackground="new 0 0 24 24"><title>search</title><path fill="#54656F" d="M15.009,13.805h-0.636l-0.22-0.219c0.781-0.911,1.256-2.092,1.256-3.386 c0-2.876-2.332-5.207-5.207-5.207c-2.876,0-5.208,2.331-5.208,5.207s2.331,5.208,5.208,5.208c1.293,0,2.474-0.474,3.385-1.255 l0.221,0.22v0.635l4.004,3.999l1.194-1.195L15.009,13.805z M10.201,13.805c-1.991,0-3.605-1.614-3.605-3.605 s1.614-3.605,3.605-3.605s3.605,1.614,3.605,3.605S12.192,13.805,10.201,13.805z"></path></svg>
                                         </div>
@@ -245,41 +187,7 @@ const SidebarLeft = ({ onButtonClick }) => {
                 <div style={{ height: '100%' }} className="chat-scroll overflow-y-scroll">
                     {users.length !== 0 &&
                         users.map((u, index) => (
-                            <div key={index} className="w-full chat-name px-4">
-                                <a onClick={() => openChatPanel(u._id)} className='w-full cursor-pointer'>
-                                    <div className="w-full pt-2.5 relative">
-                                        <div className="notificstion absolute w-[20px] h-[20px] bg-[green] rounded-full translate-y-[-50%] top-[50%] right-[10px]">
-                                            <div className="badge w-full h-full flex justify-center items-center">
-                                                <span className='text-white text-[10px]'>
-                                                    {u.notification?.length}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="flex">
-                                            <div className="pro-pic">
-                                                <div className="w-[49px] h-[49px] rounded-full overflow-hidden">
-                                                    <img src={u.profile.profile_pic} className='w-full h-full object-cover' alt="" />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex w-full flex-col pb-3 ms-4 border-b">
-                                                <div className="flex w-full justify-between">
-                                                    <div className="name">
-                                                        <span className='text-[#111b21] text-[16px]'>{u.profile.username}</span>
-                                                    </div>
-                                                    <div className="date">
-                                                        <span className='text-[12px]'>12/04/2024</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="last-msg">
-                                                    <span className='text-[13px] text-[#667781]'>Lorem ipsum dolor </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
+                            <LeftUserPanel key={index} isActive={isActive} sendrId={u._id} users={users} u={u} index={index} openChatPanel={openChatPanel} />
                         ))
                     }
 

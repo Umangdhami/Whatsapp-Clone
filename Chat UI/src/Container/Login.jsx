@@ -19,10 +19,10 @@ const Login = () => {
     const onSubmit = async (data) => {
 
         try {
-
             const response = await axios.post(ENDPOINTS.login, data);
 
             if (!response.status) {
+                localStorage.clear()
                 throw new Error(response.data.msg);
             } else {
                 localStorage.setItem('token', response.data.token)

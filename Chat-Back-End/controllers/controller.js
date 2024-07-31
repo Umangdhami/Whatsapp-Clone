@@ -113,7 +113,6 @@ const userLogin = async (req, res) => {
 const getChatUser = async (req, res) => {
   try {
     const { _id } = req.user.user;
-    console.log(_id, '_id');
     const objectId = new mongoose.Types.ObjectId(_id);
 
     const users = await registerModel.aggregate([
@@ -529,7 +528,34 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// const updateProfile  = (req, res) => {
+const getNotificationChat  = async(req, res) => {
+  try {
+
+    const {reciver_id, sender_id} = req.body
+            // chat.reciver_id == reciver_id && chat.sender_id == sendrId
+
+    const chats = await chatModel.find({
+      reciver_id : reciver_id,
+      sender_id : sender_id,
+      is_read : 0
+    });
+
+    res.json({
+      status : true,
+      message : 'Notification Fetch Successfully...',
+      data : chats
+    })
+
+  } catch (error) {
+    res.json({
+      status : false,
+      message : error.message
+    })
+  }
+
+}
+
+// const getNotificationChat  = (req, res) => {
 //   try {
 
 //   } catch (error) {
@@ -552,5 +578,6 @@ module.exports = {
   deleteChatBothside,
   updateChat,
   updateProfile,
-  getLoginUser
+  getLoginUser,
+  getNotificationChat
 };

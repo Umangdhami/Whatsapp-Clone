@@ -64,43 +64,39 @@ usp.on("connection", async (socket) => {
       console.error("Token verification failed:", err);
       socket.disconnect();
     } else {
-      console.log("Token verified:", decoded.user._id);
-
       try {
         const id = decoded.user._id;
         await registerModel.findByIdAndUpdate(id, { is_online: "1" });
 
         socket.broadcast.emit("getOnlineUser", id);
-        console.log("A user connected");
+        // console.log("A user connected");
 
         socket.on("disconnect", async () => {
           try {
             await registerModel.findByIdAndUpdate(id, { is_online: "0" });
             socket.broadcast.emit("getOfflineUser", id);
-            console.log("A user disconnected");
+            ///   console.log("A user disconnected");
           } catch (error) {
             console.error("Error updating user's online status:", error);
           }
         });
 
         socket.on("chatRead", async (data) => {
-          console.log('chatRead', data.length)
+          //  console.log('chatRead', data.length)
 
-          if(data.length != 0){
+          if (data.length != 0) {
+            const unreadChats = data.filter((chat) => chat.is_read == 0);
 
-            const unreadChats = data.filter(chat => chat.is_read == 0);
-
-            unreadChats.filter(async(chat) => {
-               await chatModel.findByIdAndUpdate(chat._id, {is_read: 1})
-            })
+            unreadChats.filter(async (chat) => {
+              await chatModel.findByIdAndUpdate(chat._id, { is_read: 1 });
+            });
             socket.broadcast.emit("chatReadSuccess", unreadChats);
           }
-
         });
 
-        socket.on('chatReciveNotification', async (data) => {
-          socket.broadcast.emit('chatReciveNotificationSuccess', data)
-        })
+        socket.on("chatReciveNotification", async (data) => {
+          socket.broadcast.emit("chatReciveNotificationSuccess", data);
+        });
 
         socket.on("newChat", async (data) => {
           // const { _id } = req.user.user;
@@ -123,24 +119,26 @@ usp.on("connection", async (socket) => {
               } = data;
               // const { _id } = decoded.user;
               let chat = await chatModel({
-                  _id: _id,
-                  reciver_username: username,
-                  sender_username: decoded.user.username,
-                  sender_id,
-                  reciver_id,
-                  is_send: 1,
-                  sent_time,
-                  message,
-                });
-                chat.save();
-
-              // socket.broadcast.emit("setChat", chat);
-                socket.broadcast.emit("loadNewChat", chat);
+                _id: _id,
+                reciver_username: username,
+                sender_username: decoded.user.username,
+                sender_id,
+                reciver_id,
+                is_send: 1,
+                sent_time,
+                message,
+              });
+              chat.save();
+              socket.broadcast.emit("loadNewChat", chat);
             }
           });
         });
+
+        
+
         socket.on("chatSend", async (data) => {
           socket.broadcast.emit("chatSendSuccess", data);
+          socket.broadcast.emit("chatSendSuccess2", data);
         });
 
         socket.on("delete-chat", async (id, senderId) => {
@@ -154,19 +152,19 @@ usp.on("connection", async (socket) => {
         });
 
         socket.on("chatRecived", async (id) => {
-            const chat = await chatModel.findByIdAndUpdate(
-              id,
-              {
-                is_recived: 1,
-              },
-              { new: true }
-            );
-            console.log("recived");
-            socket.broadcast.emit("chatRecivedSuccess", chat);
+          const chat = await chatModel.findByIdAndUpdate(
+            id,
+            {
+              is_recived: 1,
+            },
+            { new: true }
+          );
+          console.log("recived");
+          socket.broadcast.emit("chatRecivedSuccess", chat);
         });
 
         socket.on("editChat", async (data) => {
-          console.log("edittttttttttt");
+          //    console.log("edittttttttttt");
           socket.broadcast.emit("updateChat", data);
         });
       } catch (error) {

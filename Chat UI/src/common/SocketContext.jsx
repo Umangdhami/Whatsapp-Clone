@@ -14,29 +14,29 @@ export const SocketProvider = ({ children }) => {
 
     const token = localStorage.getItem('token');
     if (!token) {
-        console.error('Token not found');
-        return;
+      console.error('Token not found');
+      return;
     }
-    
+
     const newSocket = io(ENDPOINTS.socketConnection, {
-        auth: { token }
+      auth: { token }
     });
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
       console.log('Connected to socket server');
-  });
+    });
 
-  newSocket.on('disconnect', () => {
-      console.log('Disconnected from socket server');
-  });
+    // newSocket.on('disconnect', () => {
+    //   console.log('Disconnected from socket server');
+    // });
 
-    return () => {
-      if (newSocket) {
-        newSocket.disconnect();
-        console.log('Socket connection closed');
-    }
-    }
+    // return () => {
+    //   if (newSocket) {
+    //     newSocket.disconnect();
+    //     console.log('Socket connection closed');
+    // }
+    // }
   }, []);
 
   return (
@@ -45,3 +45,4 @@ export const SocketProvider = ({ children }) => {
     </SocketContext.Provider>
   );
 };
+
